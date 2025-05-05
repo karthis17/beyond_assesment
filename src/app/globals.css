@@ -108,6 +108,8 @@ body {
 
 .btn-fill {
   min-width: 170;
+  /* width: 170; */
+  max-width: 250;
   height: 48;
   top: 709px;
   left: 1112px;
