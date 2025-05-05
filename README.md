@@ -85,7 +85,7 @@ Deployed using Vercel:
 
 ## Author
 
-**Karthikeyan**  
+**Karthi Sambath**  
 [GitHub Profile](https://github.com/karthis17)
 
 ## License
