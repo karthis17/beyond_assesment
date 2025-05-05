@@ -42,27 +42,6 @@ npm run dev
 
 Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Project Structure
-
-```
-components/
-  â””â”€â”€ FormSteps/
-       â”œâ”€â”€ ResumeUpload.tsx
-       â”œâ”€â”€ BasicDetails.tsx
-       â”œâ”€â”€ SkillsForm.tsx
-       â”œâ”€â”€ EducationForm.tsx
-       â””â”€â”€ Summary.tsx
-
-context/
-  â””â”€â”€ FormContext.tsx  // Manages global form state
-
-lib/
-  â””â”€â”€ validation.ts     // Zod schemas for form validation
-
-pages/
-  â”œâ”€â”€ index.tsx         // Entry point
-  â””â”€â”€ _app.tsx          // Context provider setup
-```
 
 ## How It Works
 
