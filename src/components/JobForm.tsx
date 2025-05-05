@@ -398,15 +398,17 @@ const JobForm = () => {
                       <label>Phone</label>
                       <FormControl>
                         <PhoneInput
-                          style={{
-                            "--react-international-phone-border-color":
-                              "transperent",
-                            "--react-international-phone-background-color":
-                              "#f9f9f9",
-                            "--react-international-phone-border": "0px",
-                            "--react-international-phone-selected-dropdown-item-background-color":
-                              "#ff5c35",
-                          }}
+                          style={
+                            {
+                              "--react-international-phone-border-color":
+                                "transperent",
+                              "--react-international-phone-background-color":
+                                "#f9f9f9",
+                              "--react-international-phone-border": "0px",
+                              "--react-international-phone-selected-dropdown-item-background-color":
+                                "#ff5c35",
+                            } as any
+                          }
                           defaultCountry="in"
                           {...field}
                           className={`text-input phone flex justify-start items-center ${
