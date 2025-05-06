@@ -11,7 +11,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { PlusIcon, Trash2, X } from "lucide-react";
+import { ArrowDownZAIcon, Download, PlusIcon, Trash2, X } from "lucide-react";
 import Steps from "./Steps"; // You should have a separate Steps.tsx component for rendering step indicators
 import ResumeUploader from "./DndFileUpload"; // Assuming you have a file upload component
 const skillLevels = ["Beginner", "Intermediate", "Expert"];
@@ -33,11 +33,8 @@ const fallbackDate = new Date();
 
 // Zod schema for form validation
 const formSchema = z.object({
-  resume: z
-    .instanceof(File, { message: "Resume is required" })
-    .refine((file) => file.type === "application/pdf", {
-      message: "Only PDF files are allowed",
-    }),
+  resume: z.string().min(3, "Name must be at least 3 characters"),
+
   name: z.string().min(3, "Name must be at least 3 characters"),
   lname: z.string(),
 
@@ -65,11 +62,7 @@ const formSchema = z.object({
 
 const stepSchemas = [
   z.object({
-    resume: z
-      .instanceof(File, { message: "Resume is required" })
-      .refine((file) => file.type === "application/pdf", {
-        message: "Only PDF files are allowed",
-      }),
+    resume: z.string().min(1, "Resume is required"),
   }),
   z.object({
     name: z.string().min(3, "Name must be at least 3 characters"),
@@ -118,6 +111,8 @@ type FormData = z.infer<typeof formSchema> & {
     startYear: Date | undefined;
     endYear: Date | undefined;
   };
+  resumeUrl: string;
+  resumeMeta: { name: string; size: number; type: string };
 };
 
 const JobForm = () => {
@@ -126,7 +121,8 @@ const JobForm = () => {
   const form = useForm<FormData>({
     resolver: zodResolver(fullSchema as any),
     defaultValues: {
-      resume: undefined,
+      resume: "",
+      resumeMeta: undefined,
       name: "",
       email: "",
       phone: "",
@@ -144,6 +140,8 @@ const JobForm = () => {
 
   useEffect(() => {
     const savedData = localStorage.getItem("form");
+    const savedStep = localStorage.getItem("currentStep");
+    setStep(savedStep ? parseInt(savedStep) : 1);
     if (savedData) {
       const parsedData = JSON.parse(savedData);
 
@@ -154,6 +152,13 @@ const JobForm = () => {
       for (const key in rest) {
         form.setValue(key as any, rest[key]);
       }
+
+      const resume1 = localStorage.getItem("resumeMeta");
+
+      if (resume1) {
+        form.setValue("resumeMeta", JSON.parse(resume1));
+      }
+      form.setValue("resume", resume);
 
       // Restore skills
       if (skills && Array.isArray(skills)) {
@@ -173,17 +178,21 @@ const JobForm = () => {
   }, []);
 
   useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = ""; // Chrome requires returnValue to be set
-    };
+    if (step < 4) {
+      const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+        event.preventDefault();
+        event.returnValue = ""; // Required for some browsers
+      };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+      window.addEventListener("beforeunload", handleBeforeUnload);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
+      return () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+      };
+    }
+
+    localStorage.setItem("currentStep", step === 6 ? "1" : step.toString());
+  }, [step]); // Listen to actual `step` changes
 
   form.watch(() => {
     localStorage.setItem("form", JSON.stringify(form.getValues()));
@@ -301,6 +310,7 @@ const JobForm = () => {
               setStep(6);
               if (finalResult.success) {
                 console.log("Final Submission", finalResult.data);
+                localStorage.clear();
               } else {
                 console.log(
                   "Final form errors:",
@@ -812,9 +822,18 @@ const JobForm = () => {
 
               <div>
                 <h2 className="text-lg font-medium mb-5">Resume</h2>
-                <p className="mt-1 text-sm text-gray-900 font-medium">
-                  {form.getValues("resume")?.name || "No file uploaded"}
-                </p>
+                <div className="flex items-center gap-5">
+                  <p className="mt-1 text-sm text-gray-900 font-medium">
+                    {form.getValues("resumeMeta")?.name || "No file uploaded"}
+                  </p>
+                  <a
+                    href={form.getValues("resume") ?? "#"}
+                    download={form.getValues("resumeMeta.name")}
+                    className="text-blue-600 underline"
+                  >
+                    <Download color="#ff5c35" />
+                  </a>
+                </div>
               </div>
               <hr />
               {/* Basic Information */}

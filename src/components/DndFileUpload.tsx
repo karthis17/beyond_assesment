@@ -1,40 +1,53 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "./ui/button";
 import { CircleCheck, Loader, XCircle } from "lucide-react";
 import { useWatch } from "react-hook-form";
 import Image from "next/image";
+import { set } from "date-fns";
 
 const ResumeUploader = ({ form }: { form: any }) => {
   const [progress, setProgress] = useState(0);
 
+  const CLOUD_NAME = "dvvqvjzyw";
+  const UPLOAD_PRESET = "byond_labs";
+
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      if (acceptedFiles && acceptedFiles.length > 0) {
-        form.setValue("resume", acceptedFiles[0], {
-          shouldValidate: true,
-        });
-
-        // const data = await uploadResume(acceptedFiles[0]);
-        // console.log("Autofill data from Affinda:", data);
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+        form.setValue(
+          "resumeMeta",
+          { name: file.name, size: file.size, type: file.size },
+          { shouldValidate: true }
+        );
+        await uploadResumeToCloudinary(file);
       }
     },
     [form]
   );
 
-  const resumeValue: File | null = useWatch({
+  const resumeValue: { name: string; size: number; type: string } | null =
+    useWatch({
+      control: form.control,
+      name: "resumeMeta",
+    });
+
+  const resumeUrl = useWatch({
     control: form.control,
     name: "resume",
   });
+
+  useEffect(() => {
+    resumeUrl ? setProgress(100) : setProgress(0);
+  }, [resumeUrl]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -44,91 +57,81 @@ const ResumeUploader = ({ form }: { form: any }) => {
     maxFiles: 1,
   });
 
-  const uploadResume = async (file: File) => {
-    const response = await fetch("/api/resume-upload", {
-      method: "POST",
-      headers: {
-        "x-filename": file.name,
-      },
-      body: file,
+  const uploadResumeToCloudinary = async (file: File) => {
+    const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+
+    xhr.upload.addEventListener("progress", (e) => {
+      const percent = (e.loaded / e.total) * 100;
+      setProgress(percent);
     });
 
-    console.log(response);
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        const resumeUrl = response.secure_url;
+        form.setValue("resume", resumeUrl, { shouldValidate: true });
 
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(`Upload failed: ${text}`);
-    }
+        localStorage.setItem("resume", resumeUrl);
 
-    const contentType = response.headers.get("content-type");
-    if (contentType?.includes("application/json")) {
-      const result = await response.json();
-      return result;
-    } else {
-      const text = await response.text();
-      console.warn("Expected JSON, got text:", text);
-      return null;
-    }
+        localStorage.setItem(
+          "resumeMeta",
+          JSON.stringify({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          })
+        );
+      } else {
+        console.error("Upload failed", xhr.responseText);
+      }
+    };
+
+    xhr.send(formData);
   };
 
-  // When file changes, simulate upload
-  useEffect(() => {
-    if (!resumeValue) return;
-    setProgress(0);
-    const id = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) {
-          clearInterval(id);
-          return 100;
-        }
-        return p + 5;
-      });
-    }, 100);
-    return () => clearInterval(id);
-  }, [resumeValue]);
   return (
     <div className="w-[530px] space-y-8">
       <h3 className="text-xl mb-10">Upload Resume</h3>
-
+      <div
+        {...getRootProps()}
+        className={`flex cursor-pointer py-20 justify-center rounded-xl border-[2.36px] gap-10 border-dashed ${
+          isDragActive ? "border-blue-600 bg-blue-50" : "border-[#CBD0DC]"
+        } bg-white px-3 py-6 text-sm transition hover:border-gray-400`}
+      >
+        <input {...getInputProps()} />
+        <div className="flex flex-col items-center justify-center space-x-2">
+          <Image
+            src={"/svg/cloud-upload-icon.svg"}
+            alt="upload icon"
+            width={28}
+            height={28}
+          />
+          <div className="text-center space-y-2 py-7">
+            <h6 className="text-[16px] font-medium ">
+              Choose a file or drag & drop it here
+            </h6>
+            <p className="text-[14px] text-[#A9ACB4]">
+              Please Upload Your Resume (PDF formats only)
+            </p>
+          </div>
+          <a className="btn-outline flex items-center justify-center">
+            Browse File
+          </a>
+        </div>
+      </div>
       <FormField
         control={form.control}
         name="resume"
-        render={({ field }) => (
+        render={(field) => (
           <FormItem className="space-y-8">
             <FormControl>
-              <div
-                {...getRootProps()}
-                className={`flex cursor-pointer py-20   justify-center rounded-xl border-[2.36px] gap-10 border-dashed  ${
-                  isDragActive
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-[#CBD0DC]"
-                } bg-white px-3 py-6 text-sm transition hover:border-gray-400`}
-              >
-                <input {...getInputProps()} />
-                <div className="flex flex-col items-center justify-center space-x-2">
-                  <span>
-                    <Image
-                      src={"/svg/cloud-upload-icon.svg"}
-                      alt="upload icon"
-                      width={28}
-                      height={28}
-                    />
-                  </span>
-
-                  <div className="text-center space-y-2 py-7">
-                    <h6 className="text-[16px] font-medium ">
-                      Choose a file or drag & drop it here
-                      {/* <span className="text-blue-600 underline">browse</span> */}
-                    </h6>
-                    <p className="text-[14px] text-[#A9ACB4]">
-                      Please Upload Your Resume (PDF formats only)
-                    </p>
-                  </div>
-                  <a className="btn-outline flex items-center justify-center">
-                    Browse File
-                  </a>
-                </div>
-              </div>
+              <input type="text" {...field} className="hidden" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -136,8 +139,8 @@ const ResumeUploader = ({ form }: { form: any }) => {
       />
 
       {resumeValue && (
-        <div className="border relative border-orange-10 bg-[#FFF5F2] h-[125.83606719970703px] flex flex-col items-start justify-center  px-8 rounded-[17px]">
-          <div className="flex  items-center space-x-3 overflow-hidden">
+        <div className="border relative border-orange-10 bg-[#FFF5F2] h-[125.83606719970703px] flex flex-col items-start justify-center px-8 rounded-[17px]">
+          <div className="flex items-center space-x-3 overflow-hidden">
             <Image
               src="/svg/pdf-icon.png"
               alt="PDF"
@@ -151,7 +154,7 @@ const ResumeUploader = ({ form }: { form: any }) => {
                 of {(resumeValue.size / 1024).toFixed(0)} KB &middot;{" "}
                 {progress < 100 ? (
                   <>
-                    <Loader color="#F66135" className="w-4 h-4  ml-1" />
+                    <Loader color="#F66135" className="w-4 h-4 ml-1" />
                     Uploading…
                   </>
                 ) : (
@@ -159,7 +162,7 @@ const ResumeUploader = ({ form }: { form: any }) => {
                     <CircleCheck
                       fill="#3EBF8F"
                       color="#fff"
-                      className="w-4 h-4  ml-1"
+                      className="w-4 h-4 ml-1"
                     />
                     Complete
                   </>
@@ -171,6 +174,8 @@ const ResumeUploader = ({ form }: { form: any }) => {
             type="button"
             onClick={() => {
               setProgress(0);
+              form.setValue("resume", "");
+              form.setValue("resumeMeta", "");
             }}
             className="absolute text-gray-400 hover:text-gray-600 top-5 right-5"
           >
