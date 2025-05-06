@@ -68,7 +68,6 @@
     @apply bg-background text-foreground;
   }
 }
-
 h2 {
   @apply text-4xl font-medium;
 }
@@ -82,16 +81,13 @@ body {
   font-optical-sizing: auto;
 }
 
+/* Outline Button */
 .btn-outline {
-  width: 171;
-  height: 48;
+  width: 171px;
+  height: 48px;
   gap: 10px;
   border-radius: 4px;
-  border-width: 1px;
-  padding-top: 8px;
-  padding-right: 16px;
-  padding-bottom: 8px;
-  padding-left: 20px;
+  padding: 8px 16px 8px 20px;
   border: 1px solid #000000;
 
   font-weight: 500;
@@ -106,19 +102,14 @@ body {
   color: var(--primery-color);
 }
 
+/* Filled Button */
 .btn-fill {
-  min-width: 170;
-  /* width: 170; */
-  max-width: 250;
-  height: 48;
-  top: 709px;
-  left: 1112px;
+  min-width: 170px;
+  max-width: 250px;
+  height: 48px;
   gap: 10px;
   border-radius: 4px;
-  padding-top: 8px;
-  padding-right: 16px;
-  padding-bottom: 8px;
-  padding-left: 20px;
+  padding: 8px 16px 8px 20px;
   background: #f66135;
   color: #fff;
 
@@ -128,19 +119,16 @@ body {
   letter-spacing: 0.25px;
 }
 
+/* Input Field */
 .text-input {
-  width: 419;
-  height: 56;
-  top: 20px;
+  width: 419px;
+  height: 56px;
   gap: 10px;
   border-radius: 4px;
-  padding-top: 4px;
-  padding-right: 14px;
-  padding-bottom: 4px;
-  padding-left: 14px;
+  padding: 4px 14px;
   background: #f9f9f9;
 
-  outline: #f66135;
+  outline-color: #f66135;
   caret-color: #f66135;
   color: #5c5c5c;
 
@@ -151,9 +139,10 @@ body {
 }
 
 .text-input.err {
-  border: red 1px solid;
+  border: 1px solid red;
 }
 
+/* Label */
 label {
   font-weight: 500;
   font-size: 12px;
@@ -163,22 +152,22 @@ label {
   display: block;
 }
 
+/* Skill Tag */
 .skill-tag {
   min-height: 48px;
   gap: 10px;
   border-radius: 4px;
-  padding-right: 16px;
-  padding-left: 16px;
-  border-width: 1px;
+  padding: 0 16px;
+  border: 1px solid #ececec;
 
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
   letter-spacing: 0.1px;
   color: #5c5c5c;
-  border: 1px solid #ececec;
 }
 
+/* Hide Day Picker default element */
 span.rdp-vhidden {
   display: none;
 }

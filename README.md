@@ -36,34 +36,38 @@ A responsive, multi-step form built using **Next.js** and **React** that allows 
 ```bash
 git clone https://github.com/karthis17/beyond_assesment.git
 cd beyond_assesment
-npm install
+npm install --legacy-peer-deps
 npm run dev
 ```
 
 Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-
 ## How It Works
 
 ### Step 1: Upload Resume
+
 - Upload only PDF files.
 - File is saved in state and shown in the final summary with a download option.
 
 ### Step 2: Basic Details
+
 - Inputs for Name, Email, Phone
 - Validated using Zod and React Hook Form
 
 ### Step 3: Skills
+
 - Dynamically add as many skills as needed
 - Drag-and-drop to reorder using Dnd Kit
 - Remove any skill as needed
 
 ### Step 4: Education
+
 - Add multiple entries with degree, institution, and year
 - Remove individual entries
 - Validation ensures all fields are filled with correct format
 
 ### Step 5: Summary
+
 - Review all entries from previous steps
 - Edit any step before final submission
 
@@ -74,8 +78,8 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## To-Do / Improvements
 
+- Optimize the code structure
 - Add backend integration for final submission
-- Add file type and size restriction messages
 - Unit and E2E testing
 
 ## Deployment
