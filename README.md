@@ -78,6 +78,8 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## To-Do / Improvements
 
+- Mobile reponsive
+- Smoth Animation
 - Optimize the code structure
 - Add backend integration for final submission
 - Unit and E2E testing
